@@ -52,6 +52,85 @@ router.get('/favorites', async (req,res,next) => {
   }
 });
 
+/**
+ * This path checks if recipe is favorite
+ */
+router.get('/isFavorite', async (req,res,next) => {
+  try{
+    const answer = await user_utils.getIsFavorite(req.session.user_name, req.query.recipeId);
+    res.status(200).send(answer);
+  } catch(error) {
+    next(error); 
+  }
+});
+
+/**
+ * This path creates recipe
+ */
+router.post('/myRecipes', async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id;
+    const title = req.body.title;
+    const imageURL = req.body.image;
+    const popularity = req.body.popularity;
+    const readyInMinutes = req.body.readyInMinutes;
+    const vegan = req.body.vegan;
+    const vegetarian = req.body.vegetarian;
+    const glutenFree = req.body.glutenFree;
+    const servings = req.body.servings;
+    const instructions = req.body.instructions;
+    const ingredients = req.body.ingrediants;
+    await createRecipe(user_id, title, imageURL, popularity, readyInMinutes, vegan, vegetarian, glutenFree, servings, instructions, ingredients);
+    res.status(200).send("Your recipe has been successfully created!");
+  } catch(error) {
+    next(error); 
+  }
+});
+
+/**
+ * This path get the created recipes
+ */
+router.get('/myRecipes', async (req,res,next) => {
+  try{
+    let myCreatedRecipes = await recipe_utils.getMyRecipes(req.session.user_id);
+    const createdRecipesResults = {};
+    createdRecipesResults.recipes = myCreatedRecipes;
+    res.status(200).send(createdRecipesResults);
+  } catch(error) {
+    next(error); 
+  }
+});
+
+// /**
+//  * This path checks if the user has seen the recipe
+//  */
+// router.get('/isSeen', async (req,res,next) => {
+//   try{
+//     if (req.session.user_name) {
+//       const answer = await recipe_utils.getIsSeen(req.session.user_name, req.query.recipeId);
+//     res.status(200).send(answer);
+//     }
+//   } catch(error) {
+//     next(error); 
+//   }
+// });
+
+/**
+ * This path returns the last 3 recipes that the user watched
+ */
+router.get('/lastWatchedRecipes', async (req,res,next) => {
+  try{
+    const lastWatchedRecipes = await user_utils.getLastWatchedRecipes(req.session.user_name);
+    console.log(lastWatchedRecipes);
+    const lastWatchedRecipesResults = await Promise.all(lastWatchedRecipes.map(async (recipe) => {
+      console.log(recipe.rec_id);
+      return await recipe_utils.getAllRecipesDetails(recipe.rec_id);
+    }));
+    res.send(lastWatchedRecipesResults);
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 

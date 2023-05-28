@@ -37,9 +37,38 @@ async function getRecipeDetails(recipe_id) {
     }
 }
 
+async function getRandomRecipes() {
+    const result = await axios.get(`${api_domain}/random`, {
+        params: {
+            number: 3,
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+    return result;
+}
+
+async function getMyFamilyRecipes(user_id) {
+    try {
+        const familyRecipes = await DButils.execQuery(`SELECT * from familyRecipes where user_id='${user_id}'`);
+        return familyRecipes;
+    }
+    catch(error) {
+        next(error);
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
 exports.getRecipeDetails = getRecipeDetails;
-
+exports.getRandomRecipes = getRandomRecipes;
 
 
