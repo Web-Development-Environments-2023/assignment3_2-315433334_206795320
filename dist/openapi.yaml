@@ -169,8 +169,16 @@ paths:
       responses:
         "200":
           description: Your recipe has been successfully created!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipePreview'
         "400":
           description: Invalid recipe supplied
+        "401":
+          description: user is not authorized  
   /users/userRecipes:
     get:
       tags:
@@ -186,6 +194,8 @@ paths:
                 type: object
                 items:
                   $ref: '#/components/schemas/MyRecipePreview'
+        "401":
+          description: user is not authorized          
       security:
       - cookieAuth: []
   /users/myFamilyRecipes:
@@ -206,8 +216,46 @@ paths:
         "401":
           description: user is not authorized
       security:
-      - cookieAuth: []            
-  /recipes/{recipeId}:
+      - cookieAuth: []
+  /users/isFavorite:
+    get:
+      tags:
+      - Users
+      summary: Checks if a recipe is favorite by its id 
+      description: Return a boolean for if a recipe is favorite by its id
+      responses:
+        "200":
+          description: the recipe is/is not favorite
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/RecipePreview'
+        "401":
+          description: user is not authorized
+      security:
+      - cookieAuth: []
+  /users/isWatched:
+    get:
+      tags:
+      - Users
+      summary: Checks if a recipe is watched by its id 
+      description: Return a boolean for if a recipe is watched by its id
+      responses:
+        "200":
+          description: the recipe is/is not watched
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/RecipePreview'
+        "401":
+          description: user is not authorized
+      security:
+      - cookieAuth: []                
+  /recipes/:recipeId:
     get:
       tags:
       - Recipes
@@ -240,9 +288,9 @@ paths:
       responses:
         "200":
           description: Successfully returned 3 random recipes
-        "400":
-          description: Wrong input 
-  /recipes/search/{query}/{number}/{cuisine}/{diet}/{intolerance}:
+        "404":
+          description: No recipes found 
+  /recipes/search/:query:
     get:
       tags:
       - Recipes
@@ -291,11 +339,11 @@ paths:
         "404":
           description: We couldn't find any results matching your search 
 components:
-  schemas:  MyRecipePreview
+  schemas:
     userRegister:
       type: object
       properties:
-        username:
+        user_name:
           maxLength: 8
           minLength: 3
           type: string
@@ -335,7 +383,7 @@ components:
     userLogin:
       type: object
       properties:
-        username:
+        user_name:
           maxLength: 8
           minLength: 3
           type: string
@@ -346,7 +394,7 @@ components:
           description: password conatins at least one number and one special char
           format: password
       example:
-        username: my_name
+        user_name: my_name
         password: my_name@12
       createARecipe:
         required:
