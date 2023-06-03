@@ -10,7 +10,7 @@ router.post("/Register", async (req, res, next) => {
     // valid parameters
     // username exists
     let user_details = {
-      username: req.body.username,
+      user_name: req.body.user_name,
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       country: req.body.country,
@@ -19,9 +19,9 @@ router.post("/Register", async (req, res, next) => {
       // profilePic: req.body.profilePic
     }
     let users = [];
-    users = await DButils.execQuery("SELECT username from users");
+    users = await DButils.execQuery("SELECT user_name from users");
 
-    if (users.find((x) => x.username === user_details.username))
+    if (users.find((x) => x.user_name === user_details.user_name))
       throw { status: 409, message: "Username taken" };
 
     // add the new username
@@ -30,7 +30,7 @@ router.post("/Register", async (req, res, next) => {
       parseInt(process.env.bcrypt_saltRounds)
     );
     await DButils.execQuery(
-      `INSERT INTO users (username, firstname, lastname, country, password, email) VALUES ('${user_details.username}', '${user_details.firstname}', '${user_details.lastname}',
+      `INSERT INTO users (user_name, firstname, lastname, country, password, email) VALUES ('${user_details.user_name}', '${user_details.firstname}', '${user_details.lastname}',
       '${user_details.country}', '${hash_password}', '${user_details.email}')`
     );
     res.status(201).send({ message: "user created", success: true });
@@ -42,14 +42,14 @@ router.post("/Register", async (req, res, next) => {
 router.post("/Login", async (req, res, next) => {
   try {
     // check that username exists
-    const users = await DButils.execQuery("SELECT username FROM users");
-    if (!users.find((x) => x.username === req.body.username))
+    const users = await DButils.execQuery("SELECT user_name FROM users");
+    if (!users.find((x) => x.user_name === req.body.user_name))
       throw { status: 401, message: "Username or Password incorrect" };
 
     // check that the password is correct
     const user = (
       await DButils.execQuery(
-        `SELECT * FROM users WHERE username = '${req.body.username}'`
+        `SELECT * FROM users WHERE user_name = '${req.body.user_name}'`
       )
     )[0];
 
