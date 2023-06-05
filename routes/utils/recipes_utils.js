@@ -47,6 +47,20 @@ async function getRandomRecipes() {
     return result;
 }
 
+// async function getRandomRecipes() {
+//   const url = `${api_domain}/random?number=3&apiKey=${process.env.spooncular_apiKey}`;
+
+//   try {
+//     const response = await fetch(url);
+//     const data = await response.json();
+//     return data;
+//   } catch (error) {
+//     console.error('Error:', error);
+//     throw error;
+//   }
+// }
+
+
 async function getMyFamilyRecipes(user_id) {
     try {
         const familyRecipes = await DButils.execQuery(`SELECT * from familyRecipes where user_id='${user_id}'`);
@@ -56,6 +70,34 @@ async function getMyFamilyRecipes(user_id) {
         next(error);
   }
 }
+
+async function getSearchSimilar(user_id, search_details) {
+    try {
+      const searchResults = await axios.get(`${api_domain}/complexSearch?`, { params: search_details });
+  
+      if (searchResults.data.totalResults === 0) {
+        return "Found 0 search results";
+      }
+  
+      const resultsData = searchResults.data.results;
+      const resultsIds = resultsData.map((element) => element.id);
+  
+      const recipePromises = resultsIds.map((id) => getRecipeDetails(user_id, id));
+      const recipesResults = await Promise.all(recipePromises);
+  
+      const updatedRecipes = recipesResults.map((result) => {
+        delete result.ingredients;
+        delete result.servings;
+        return result;
+      });
+  
+      return updatedRecipes;
+    } catch (error) {
+      console.error('Error searching recipes:', error);
+      throw error;
+    }
+  }
+  
 
 
 
@@ -70,5 +112,7 @@ async function getMyFamilyRecipes(user_id) {
 
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;
+exports.getMyFamilyRecipes = getMyFamilyRecipes;
+exports.getSearchSimilar = getSearchSimilar;
 
 
