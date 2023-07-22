@@ -8,6 +8,23 @@ const DButils = require("./routes/utils/DButils");
 var cors = require('cors')
 
 var app = express();
+
+// const allowedOrigins = [
+//   'http://localhost:8080', // Replace with the URL of your Vue.js frontend
+//   'http://localhost',    // Add more origins as needed
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // Check if the request origin is allowed
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+// }));
+
 app.use(logger("dev")); //logger
 app.use(express.json()); // parse application/json
 app.use(
@@ -71,7 +88,23 @@ app.use(function (req, res, next) {
     next();
   }
 });
-//#endregion
+
+// //#endregion//#region cookie middleware
+// app.use(function (req, res, next) {
+//   if (req.session && req.session.username) {
+//     DButils.execQuery("SELECT username FROM users")
+//       .then((users) => {
+//         if (users.find((x) => x.username === req.session.username)) {
+//           req.username = req.session.username;
+//         }
+//         next();
+//       })
+//       .catch((error) => next());
+//   } else {
+//     next();
+//   }
+// });
+// //#endregion
 
 // ----> For cheking that our server is alive
 app.get("/alive", (req, res) => res.send("I'm alive"));

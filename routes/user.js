@@ -156,10 +156,20 @@ router.get("/myFamilyRecipes", async (req, res, next) => {
  */
 router.get("/lastWatchedRecipes", async (req, res, next) => {
   try {
+    // this.axios.defaults.withCredentials = true;
     const user_id = req.session.user_id;
     const recipes = await user_utils.getLastThreeRecipes(user_id);
-    const results = await recipe_utils.getFullDetailsOfRecipes(recipes, user_id);
+    console.log(recipes);
+    const results = [];
+
+    for (const recipe of recipes) {
+      const recipeDetails = await recipe_utils.getRecipeDetails(recipe.recipe_id);
+      results.push(recipeDetails);
+    }
+
     res.send(results);
+    // this.axios.defaults.withCredentials = false;
+
   } catch (error) {
     next(error);
   }
@@ -170,7 +180,7 @@ module.exports = router;
 
 
 
-//create recipe format:
+// //create recipe format:
 // {
 //   "name": "pasta",
 //   "imageURL": "https://spoonacular.com/recipeImages/641799-556x370.jpg",

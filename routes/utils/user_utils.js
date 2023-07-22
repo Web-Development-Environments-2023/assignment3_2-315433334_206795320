@@ -53,11 +53,11 @@ async function saveRecipeAsWatched(user_id, recipe_id) {
  */
 async function createRecipe(recipeData) {
     const {user_id, recipe_id, name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructions, servings, ingredients} = recipeData;
-    const instructionsString = JSON.stringify(instructions);
-    const ingredientsString = JSON.stringify(ingredients);
-    const query = `INSERT INTO recipesbyuser (user_id, recipe_id, name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructions, servings, ingredients) VALUES (${user_id}, '${recipe_id}', '${recipeData.name}', '${recipeData.imageURL}', ${recipeData.preparationTimeInMinutes}, ${recipeData.numOfLikes}, ${recipeData.vegan}, ${recipeData.vegetarian}, '${recipeData.glutenFree}', '${instructionsString}', '${recipeData.servings}', '${ingredientsString}')`;
-    const values = [user_id, recipe_id, name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructionsString, servings, ingredientsString];
-    await DButils.execQuery(query, values);
+    // const instructionsString = JSON.stringify(instructions);
+    // const ingredientsString = JSON.stringify(ingredients);
+    const query = `INSERT INTO recipesbyuser (user_id, recipe_id, name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructions, servings, ingredients) VALUES (${user_id}, '${recipe_id}', '${recipeData.name}', '${recipeData.imageURL}', ${recipeData.preparationTimeInMinutes}, ${recipeData.numOfLikes}, ${recipeData.vegan}, ${recipeData.vegetarian}, '${recipeData.glutenFree}', '${recipeData.instructions}', '${recipeData.servings}', '${recipeData.ingredients}')`;
+    const values = [user_id, recipe_id, name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructions, servings, ingredients];
+    await DButils.execQuery(query, values);
 }
 
 /**
@@ -66,8 +66,8 @@ async function createRecipe(recipeData) {
 function validateRecipeData(recipeData) {
     const {name, imageURL, preparationTimeInMinutes, numOfLikes, vegan, vegetarian, glutenFree, instructions, servings, ingredients} = recipeData;
     if (!name || !imageURL || vegetarian === undefined || vegan === undefined || glutenFree === undefined || !preparationTimeInMinutes || !servings || !instructions || !ingredients || !numOfLikes) {
-      throw { status: 400, message: "Incomplete or invalid recipe data provided." };
-    }
+      throw { status: 400, message: "Incomplete or invalid recipe data provided." };
+    }
 }
 
 /**

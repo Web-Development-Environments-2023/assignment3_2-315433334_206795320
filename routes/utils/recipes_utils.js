@@ -13,7 +13,8 @@ async function getRecipeInformation(recipe_id) {
         params: {
             includeNutrition: false,
             apiKey: process.env.spooncular_apiKey
-        }
+        },
+        // withCredentials: true,
     });
 }
 
