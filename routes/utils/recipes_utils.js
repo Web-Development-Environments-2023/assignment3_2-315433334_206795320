@@ -89,14 +89,11 @@ async function getPartialRecipeDetails(recipes) {
 /**
  * This function returns the full details of a recipes by its id
  */
-async function getFullDetailsOfRecipe(recipe_id, user_id) {
-    const recipeFullInformation = await getRecipeInformation(recipe_id);
-    const { id, title, image, readyInMinutes, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, servings } = recipeFullInformation.data;
-    const instructions = await getRecipeInstructions(recipe_id);
-    const analyze_Instructions = instructions.data;
-    const favorite = await user_utils.getIsFavorite(user_id, recipe_id);
-    const watch = await user_utils.getIsRecipeWatched(user_id, recipe_id);
-    const fullDetails = {
+async function getFullDetailsOfRecipe(recipe_id) {
+    console.log("into full function");
+    let recipeFullInformation = await getRecipeInformation(recipe_id);
+    let { id, title, image, readyInMinutes, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, servings} = recipeFullInformation.data;
+    return {
       id: id,
       image: image,
       title: title,
@@ -104,14 +101,11 @@ async function getFullDetailsOfRecipe(recipe_id, user_id) {
       aggregateLikes: aggregateLikes,
       vegan: vegan,
       vegetarian: vegetarian,
-      gluten_free: glutenFree,
-      ingredients: extendedIngredients,
-      analyze_Instructions: analyze_Instructions,
+      glutenFree: glutenFree,
+      extendedIngredients: extendedIngredients,
+      analyzedInstructions: analyzedInstructions,
       servings: servings,
-      favorite: favorite,
-      watch: watch,
-    };
-    return fullDetails;
+    };
 }
   
 /**

@@ -9,6 +9,7 @@ router.post("/Register", async (req, res, next) => {
     // parameters exists
     // valid parameters
     // username exists
+    // console.log("Register"+req.query.username);
     let user_details = {
       username: req.body.username,
       firstname: req.body.firstname,
@@ -58,7 +59,11 @@ router.post("/Login", async (req, res, next) => {
     }
 
     // Set cookie
-    req.session.user_id = user.user_id;
+    // req.session.user_id = user.user_id;
+    req.session.user = user;
+    // res.cookie('connect.sid', req.session.id);
+    // // Set cookie
+    // req.session.username = user.username;
 
 
     // return cookie

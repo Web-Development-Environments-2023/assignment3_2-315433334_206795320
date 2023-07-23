@@ -8,10 +8,19 @@ const recipe_utils = require("./utils/recipes_utils");
  * Authenticate all incoming requests by middleware
  */
 router.use(async function (req, res, next) {
-  if (req.session && req.session.user_id) {
+  console.log("im here now");
+  console.log(req.session);
+  // console.log(req.session.user.user_id);
+
+  if (req.session && req.session.user) {
     DButils.execQuery("SELECT user_id FROM users").then((users) => {
-      if (users.find((x) => x.user_id === req.session.user_id)) {
-        req.user_id = req.session.user_id;
+      if (users.find((x) => x.user_id === req.session.user.user_id)) {
+        // req.user.user_id = req.session.user.user_id;
+        // req.session.user = req.user;
+        // req.user = req.session.user;
+        // req.session.user = user;
+        // req.session.user.user_id = req.user.user_id;
+        // req.session.user.user_id = user.user_id;
         next();
       }
     }).catch(err => next(err));
@@ -21,15 +30,68 @@ router.use(async function (req, res, next) {
 });
 
 
+// //from chat
+// /**
+//  * Authenticate all incoming requests by middleware
+//  */
+// router.use(async function (req, res, next) {
+//   console.log("im here now");
+//   console.log(req.session);
+
+//   // Ensure that the session is available before accessing req.session.user
+//   if (req.session && req.session.user) {
+//     // Check if the user is valid in the database
+//     try {
+//       const users = await DButils.execQuery("SELECT user_id FROM users");
+//       if (users.find((x) => x.user_id === req.session.user.user_id)) {
+//         // If the user is valid, proceed to the next middleware or route handler
+//         next();
+//       } else {
+//         // If the user is not valid, send a 401 Unauthorized status
+//         res.sendStatus(401);
+//       }
+//     } catch (error) {
+//       // Handle any errors that may occur during the database query
+//       next(error);
+//     }
+//   } else {
+//     // If the session is not available, send a 401 Unauthorized status
+//     res.sendStatus(401);
+//   }
+// });
+
+
+
+// /**
+// * Authenticate all incoming requests by middleware
+// */
+// router.use(async function (req, res, next) {
+//  if (req.session && req.session.username) {
+//    DButils.execQuery("SELECT user_id FROM users").then((users) => {
+//      if (users.find((x) => x.username === req.session.username)) {
+//        req.username = req.session.username;
+//        next();
+//      }
+//    }).catch(err => next(err));
+//  } else {
+//    res.sendStatus(401);
+//  }
+// });
+
+
 /**
  * This path gets body with recipeId and save this recipe in the favorites list of the logged-in user
  */
 router.post('/favorites', async (req,res,next) => {
   try{
-    const user_id = req.session.user_id;
-    const recipe_id = req.body.recipeId;
-    await user_utils.markAsFavorite(user_id, recipe_id);
-    res.status(200).send("The Recipe successfully saved as favorite");
+    console.log("Im at postFavorites");
+    const user_id = req.session.user.user_id;
+    console.log("user "+user_id);
+    const recipe_id = req.body.recipe_Id;
+    console.log("recipe "+recipe_id);
+    
+    const results = await user_utils.markAsFavorite(user_id, recipe_id);
+    res.status(200).send(results + "The Recipe successfully saved as favorite");
     } catch(error){
     next(error);
   }
@@ -38,9 +100,9 @@ router.post('/favorites', async (req,res,next) => {
 /**
  * This path returns the favorites recipes that were saved by the logged-in user
  */
-router.get('/favorites', async (req,res,next) => {
+router.get('/getFavorites', async (req,res,next) => {
   try{
-    const user_id = req.session.user_id;
+    const user_id = req.session.user.user_id;
     let favorite_recipes = {};
     const recipes_id = await user_utils.getFavoriteRecipes(user_id);
     let recipes_id_array = [];
@@ -57,8 +119,9 @@ router.get('/favorites', async (req,res,next) => {
  */
 router.post('/watched', async (req, res, next) => {
   try {
-    const user_id = req.session.user_id;
-    const recipe_id = req.body.recipe_id;
+    console.log("Im here");
+    const user_id = req.session.user.user_id;
+    const recipe_id = req.query.recipe_id;
     if (!Number.isInteger(Number(recipe_id))) {
       throw { status: 400, message: "Invalid Recipe ID. Recipe ID must be an integer" };
     }
@@ -75,7 +138,7 @@ router.post('/watched', async (req, res, next) => {
  */
 router.get('/isFavorite', async (req,res,next) => {
   try{
-    const answer = await user_utils.getIsFavorite(req.session.user_id, req.body.recipe_Id);
+    const answer = await user_utils.getIsFavorite(req.session.user.user_id, req.body.recipe_Id);
     res.status(200).send(answer);
   } catch(error) {
     next(error); 
@@ -87,9 +150,16 @@ router.get('/isFavorite', async (req,res,next) => {
  */
 router.get("/isWatched", async (req, res, next) => {
   try {
-    const { user_id } = req.session;
+    console.log("Im here2");
+    // console.log(req.session.user.user_id);
+
+    const user_id = req.session.user.user_id;
+    // console.log("user "+user_id);
+
     if (user_id) {
-      const recipe_id = req.body.recipe_Id;
+      const recipe_id = req.query.recipe_Id;
+      // console.log("recipe "+recipe_id);
+
       const isWatched = await user_utils.getIsRecipeWatched(user_id, recipe_id);
       res.send(isWatched);
     } else {
@@ -107,7 +177,7 @@ router.get("/isWatched", async (req, res, next) => {
 router.post('/createARecipe', async (req,res,next) => {
   try{
     const recipeData = {
-      user_id: req.session.user_id,
+      user_id: req.session.user.user_id,
       ...req.body
     };
     // Determine the highest existing recipe_id in recipesbyuser table
@@ -117,7 +187,7 @@ router.post('/createARecipe', async (req,res,next) => {
     const newRecipeId = maxRecipeId + 1;
     // Assign the new recipe_id to the recipeData
     recipeData.recipe_id = newRecipeId;
-    user_utils.validateRecipeData(recipeData);
+    // user_utils.validateRecipeData(recipeData);
     await user_utils.createRecipe(recipeData);
     res.status(200).send(recipeData);
   } catch(error) {
@@ -130,7 +200,7 @@ router.post('/createARecipe', async (req,res,next) => {
  */
 router.get('/userRecipes', async (req,res,next) => {
   try {
-    const user_id = req.session.user_id;
+    const user_id = req.session.user.user_id;
     const results = await user_utils.getMyRecipesPreview(user_id);
     res.status(200).send(results);
   } catch (error) {
@@ -155,9 +225,12 @@ router.get("/myFamilyRecipes", async (req, res, next) => {
  * This path returns the last 3 recipes that the user has watched
  */
 router.get("/lastWatchedRecipes", async (req, res, next) => {
+  console.log("Im here3");
   try {
     // this.axios.defaults.withCredentials = true;
-    const user_id = req.session.user_id;
+    console.log(req.session);
+    const user_id = req.session.user.user_id;
+    console.log(user_id);
     const recipes = await user_utils.getLastThreeRecipes(user_id);
     console.log(recipes);
     const results = [];
@@ -173,6 +246,15 @@ router.get("/lastWatchedRecipes", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+router.get("/:recipe_Id", async (req, res, next) => {
+  try {
+    const recipe = await recipe_utils.getFullDetailsOfRecipe(req.params.recipe_Id);
+    res.send(recipe);
+  } catch (error) {
+    next(error);
+  }
 });
 
 
